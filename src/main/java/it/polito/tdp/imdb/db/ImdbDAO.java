@@ -6,7 +6,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
 import it.polito.tdp.imdb.model.Actor;
+import it.polito.tdp.imdb.model.Coppia;
 import it.polito.tdp.imdb.model.Director;
 import it.polito.tdp.imdb.model.Movie;
 
@@ -61,9 +64,9 @@ public class ImdbDAO {
 	}
 	
 	
-	public List<Director> listAllDirectors(){
+	public void listAllDirectors(Map<Integer, Director> idMap){
 		String sql = "SELECT * FROM directors";
-		List<Director> result = new ArrayList<Director>();
+		//List<Director> result = new ArrayList<Director>();
 		Connection conn = DBConnect.getConnection();
 
 		try {
@@ -71,9 +74,72 @@ public class ImdbDAO {
 			ResultSet res = st.executeQuery();
 			while (res.next()) {
 
-				Director director = new Director(res.getInt("id"), res.getString("first_name"), res.getString("last_name"));
+				if(!idMap.containsKey(res.getInt("id"))) {
+					Director director = new Director(res.getInt("id"), res.getString("first_name"), res.getString("last_name"));
 				
-				result.add(director);
+				idMap.put(res.getInt("id"), director);
+				}
+			}
+			conn.close();
+		//	return result;
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return ;
+		}
+	}
+	
+	public List<Director> getVertici(Integer anno, Map<Integer, Director > idMap){
+		String sql ="SELECT distinct d.director_id as id "
+				+ "FROM movies m, movies_directors d "
+				+ "WHERE m.id=d.movie_id AND m.year = ? ";
+		List<Director> result = new ArrayList<Director>();
+			Connection conn = DBConnect.getConnection();
+
+			try {
+				PreparedStatement st = conn.prepareStatement(sql);
+				st.setInt(1, anno);
+				ResultSet res = st.executeQuery();
+				while (res.next()) {
+
+					result.add(idMap.get(res.getInt("id")));
+					
+				}
+				conn.close();
+				return result;
+				
+			} catch (SQLException e) {
+				e.printStackTrace();
+				return null;
+			}
+	}
+	 
+	public List<Coppia> getArchi(Integer anno, Map<Integer, Director> idMap){
+		String sql="SELECT d1.director_id d1, d2.director_id d2, COUNT(r1.actor_id) AS peso "
+				+ "FROM movies_directors d1, movies_directors d2, movies m1,movies m2, roles r1, roles r2 "
+				+ "WHERE d1.director_id<>d2.director_id "
+				+ "		AND d1.director_id>d2.director_id "
+				+ "		AND m1.year = ? "
+				+ "		AND m2.year = ? "
+				+ "		AND d1.movie_id = m1.id "
+				+ "		AND d2.movie_id = m2.id "
+				+ "		AND m1.id= r1.movie_id "
+				+ "		AND m2.id=r2.movie_id "
+				+ "		AND r1.actor_id=r2.actor_id "
+				+ "GROUP BY d1.director_id, d2.director_id ";
+		
+		List<Coppia> result = new ArrayList<Coppia>();
+		Connection conn = DBConnect.getConnection();
+
+		try {
+			PreparedStatement st = conn.prepareStatement(sql);
+			st.setInt(1, anno);
+			st.setInt(2, anno);
+			ResultSet res = st.executeQuery();
+			while (res.next()) {
+				result.add(new Coppia(idMap.get(res.getInt("d1")),idMap.get(res.getInt("d2")),
+						res.getInt("peso")));
+				
 			}
 			conn.close();
 			return result;
@@ -82,10 +148,9 @@ public class ImdbDAO {
 			e.printStackTrace();
 			return null;
 		}
+		
+		
 	}
-	
-	
-	
 	
 	
 	
