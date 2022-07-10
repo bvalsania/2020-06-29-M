@@ -20,6 +20,98 @@ public class Model {
 	private Graph<Director, DefaultWeightedEdge> grafo;
 	private Map<Integer, Director> idMap;
 	
+	public Model() {
+		dao = new ImdbDAO();
+		idMap = new HashMap<>();
+		this.dao.listAllDirectors(idMap);
+	}
+	
+	
+	public String creag(int anno) {
+		grafo = new SimpleWeightedGraph<>(DefaultWeightedEdge.class);
+		
+		Graphs.addAllVertices(this.grafo, this.dao.getv(anno, idMap));
+		
+		for(Coppia c : this.dao.getarchi(anno, idMap)) {
+		Graphs.addEdge(this.grafo, c.getD1(), c.getD2(), c.getPeso());
+		}
+		
+		return "Il grafo creato ha vertici e archi : "+this.grafo.vertexSet().size()+"  "+grafo.edgeSet().size();
+	}
+	
+	
+	public List<Director> getdire(){
+		List<Director> dire = new ArrayList<>(grafo.vertexSet());
+		
+		Collections.sort(dire, new Comparator<Director> () {
+
+			@Override
+			public int compare(Director o1, Director o2) {
+				// TODO Auto-generated method stub
+				return o1.id.compareTo(o2.id);
+			}
+		});
+		return dire;
+	}
+	
+	
+	public List<Adiacenza> getAdiacenti(Director d){
+		List<Adiacenza> res = new ArrayList<>();
+		
+		for(Director i: Graphs.neighborListOf(this.grafo, d)) {
+			res.add(new Adiacenza (i,(int) grafo.getEdgeWeight(grafo.getEdge(i, d))));
+		}
+		
+		Collections.sort(res, new Comparator<Adiacenza>() {
+
+			@Override
+			public int compare(Adiacenza o1, Adiacenza o2) {
+				// TODO Auto-generated method stub
+				return o2.getPeso().compareTo(o1.getPeso());
+			}
+		});
+		return res;
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+/*	private ImdbDAO dao;
+	private Graph<Director, DefaultWeightedEdge> grafo;
+	private Map<Integer, Director> idMap;
+	
 	private List<Director> ottimo;
 	private int lOttimo;
 	
@@ -138,5 +230,5 @@ public class Model {
 		return a;
 		
 	}
-	
+	*/
 }

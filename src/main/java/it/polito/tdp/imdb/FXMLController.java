@@ -8,6 +8,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
 
+import it.polito.tdp.imdb.model.Adiacenza;
 import it.polito.tdp.imdb.model.Director;
 import it.polito.tdp.imdb.model.Model;
 import javafx.event.ActionEvent;
@@ -50,26 +51,64 @@ public class FXMLController {
 
     @FXML
     void doCreaGrafo(ActionEvent event) {
+ 
     	txtResult.clear();
     	
-    	Integer a = this.boxAnno.getValue();
-    	if(a==null) {
-    		txtResult.appendText("Seleziona un anno!");
+    	int anno = this.boxAnno.getValue();
+    	
+    	if (anno == 0) {
+    		txtResult.appendText("errore, selezionare un anno ");
     		return;
     	}
-    	this.model.creaGrafo(a);
-    	txtResult.appendText("Grafo creato!! \n");
-    	txtResult.appendText("#vertici: "+ this.model.nVertici()+"\n");
-    	txtResult.appendText("# archi: " +this.model.nArchi());
+    	
+    	String msg = this.model.creag(anno);
+    	txtResult.appendText(msg);
+    	
+    	
     	
     	this.boxRegista.getItems().clear();
-    	this.boxRegista.getItems().addAll(this.model.getVertici());
+    	this.boxRegista.getItems().addAll(this.model.getdire());
     	
     }
 
     @FXML
     void doRegistiAdiacenti(ActionEvent event) {
+  
     	
+    	Director d = this.boxRegista.getValue();
+    	
+    	if(d == null) {
+    		txtResult.appendText("errore, selelzionare un dire");
+    		return;
+    	}
+    	
+    	List<Adiacenza> a = this.model.getAdiacenti(d);
+    	txtResult.appendText("Registi Adiacenti: \n"+a);
+    	
+    	
+    	
+    	
+    	
+    	
+    	
+    	
+    	
+    	
+    	
+    	
+    	
+    	
+    	
+    	
+    	
+    	
+    	
+    	
+    	
+    	
+    	
+    	
+    	/*	
     	txtResult.clear();
     	Integer a = this.boxAnno.getValue();
     	if(a==null) {
@@ -86,12 +125,12 @@ public class FXMLController {
     	txtResult.appendText("Regista Adiacente di: \n"+ d);
     	txtResult.appendText("\n"+this.model.getAdiacenza(d, a) );
     	
-
+*/
     }
 
     @FXML
     void doRicorsione(ActionEvent event) {
-    	txtResult.clear();
+   /* 	txtResult.clear();
     	Director r = this.boxRegista.getValue();
     	
     	try {
@@ -108,7 +147,7 @@ public class FXMLController {
     	
 
     	txtResult.appendText("\n\n  #attori condivisi: "+this.model.getlottimo());
-
+*/
     }
 
     @FXML // This method is called by the FXMLLoader when initialization is complete
@@ -127,7 +166,9 @@ public class FXMLController {
     	
     	this.model = model;
     	
-    	this.boxAnno.getItems().addAll(this.model.getAnno());
+    	for(int i = 2004; i<=2006; i++) {
+    		this.boxAnno.getItems().add(i);
+    	}
     }
     
 }
